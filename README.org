@@ -1,0 +1,57 @@
+#+TITLE: NeLisp Touchpad
+
+* Use
+The app lives in the Windows notification area. A green touchpad means enabled;
+a red touchpad with a slash means disabled. Left-click to toggle. Right-click
+for explicit On, Off, Windows Settings, and Exit commands. Windows may initially
+place the icon in the notification area's overflow menu.
+
+The installer creates a Start menu shortcut and a Startup shortcut. Delete only
+the Startup shortcut to stop automatic launch. Exit keeps the current touchpad
+setting. Windows Settings remains available independently of this app.
+
+* Build and install
+Run =tools/build.ps1= followed by =tools/install.ps1= in PowerShell.
+Requires sibling NeLisp and Sumi checkouts, GNU Emacs as the build driver,
+and the MinGW toolchain with Cairo. Override dependencies with =NELISP_ROOT=,
+=SUMI_ROOT= and =MINGW_BIN=. The installed native executable bundles its Cairo
+dependencies and does not require Emacs or PowerShell while running.
+
+* Architecture and limits
+Application logic is Elisp compiled by the NeLisp AOT compiler to Windows x64.
+The icon renderer includes Sumi's =apply_source_rgba= directly from its renderer
+source. Win32 provides the tray, popup menu, message loop, and icon handles.
+No changes to the NeLisp or Sumi source repositories are required.
+
+State comes from =SPI_GETTOUCHPADPARAMETERS= version 1, supported by Windows 11
+24H2 and later. Its touchpadEnabled member is read-only. The app invokes the
+Windows Shell touchpad command through Ctrl+Win+F24 using SendInput, then polls
+the real state for up to one second. This shortcut is a Shell compatibility
+dependency, verified on the installation machine; failures are shown explicitly.
+PnP devices and registry values are never changed by this app.
+
+Only one resident instance is allowed per session. Explorer's TaskbarCreated
+message recreates the tray icon after Explorer restarts. A two-second timer
+refreshes state changes made through Windows Settings.
+
+The executable embeds a Per Monitor V2 DPI-awareness manifest. Before showing
+the native popup, its hidden owner moves to the pointer's monitor so Windows
+uses that monitor's scale without bitmap enlargement. =tools/dpi-check.ps1=
+checks the installed process, and =--inspect= checks the actual owner's context.
+
+Repository: https://github.com/zawatton/nelisp-touchpad
+
+Command-line switches: =--status= exits 0 for on, 10 for off, 20 for unavailable;
+=--on=, =--off= and =--quit= address the running instance. =--inspect= verifies
+the registered Shell icon and native menu. Other nonzero exits indicate errors.
+
+* Validation
+=tools/acceptance.ps1= tests the running app and restores its original state.
+It checks Shell icon registration, menu creation, actual off/on state, unchanged
+pointing-device status, and duplicate-instance rejection. Pass =-AppPath= to
+test the installed copy. Human visual inspection is a separate check.
+The progress ledger references local evidence under =target/=; generated
+executables, machine-specific diagnostics, and installation receipts are not
+included in the repository.
+
+Reference: https://learn.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-touchpad_parameters_v1

@@ -1,0 +1,36 @@
+#+TITLE: NeLisp Sumi touchpad tray
+
+* S1 Resident touchpad control
+** S1.1 Native NeLisp build and Sumi icon rendering
+#+NOTE: The native app compiles Sumi's source-color function and creates both icon handles. Human visual inspection is unavailable because the Computer Use native pipe is missing.
+evidence: target/build.log sha256=171acabd2f54c87554ff05aa8b78197ad870d0d96e02caae88d1190f96dd6494
+** S1.2 Touchpad enabled state toggles and pointing-device status is preserved
+#+NOTE: Acceptance also rejects a missing resident as a negative control.
+evidence: target/acceptance.log sha256=dc893f8050dd06a2de92d33f6a450d6ad8d389bafd1ef3da62b8653db3e9c79c
+
+evidence: target/negative-control.log sha256=59b7f05ce604628ba4cef616dec4f8f7bb795e2f5a2b053d2c5e12da842fdc35
+** S1.3 Installed app starts through its sign-in shortcut and passes end-to-end checks
+#+NOTE: Three criteria retained; wording narrowed to the actual verified behavior. Actual sign-out/sign-in was not performed.
+evidence: target/installation.json sha256=277f7bd22311c635ecde33e76e8e519c1e5cc9c28a717e6fe0dc59b037a56644
+evidence: target/acceptance.log sha256=dc893f8050dd06a2de92d33f6a450d6ad8d389bafd1ef3da62b8653db3e9c79c
+
+* S2 High-DPI context menu
+** S2.1 Executable declares Per Monitor V2 awareness
+#+NOTE: Added three DPI criteria, increasing the objective from three to six criteria. The baseline DPI check rejects the previous unaware resident.
+evidence: src/touchpad.manifest sha256=3561fc6e685db2be8568575798d4cc0866728403508b914ea0f0410d46b72163
+evidence: target/dpi-before.log sha256=cd0fffa93d5295dea353f4c0ad61a94a865da05099715f9ec6f3d6d301eabb02
+evidence: target/dpi-after.log sha256=ee7ad71e7a7b442e7a04592aac70b50f7f42f1bacd6b8e5742d667b2585a8e6c
+** S2.2 Installed resident exposes Per Monitor V2 awareness
+cmd: powershell.exe -NoProfile -File tools/dpi-check.ps1
+** S2.3 Installed tray and actual touchpad toggle pass after the DPI update
+#+NOTE: Native inspection additionally requires the actual hidden menu owner's DPI context to equal Per Monitor V2. Visual sharpness and mixed-monitor interaction remain unverified without a working native Computer Use connection.
+evidence: target/dpi-acceptance.log sha256=dc893f8050dd06a2de92d33f6a450d6ad8d389bafd1ef3da62b8653db3e9c79c
+
+* S3 Repository publication
+** S3.1 Git tracks exactly the twelve source and documentation files
+#+NOTE: Three publication criteria added, increasing the denominator from six to nine. Generated evidence remains local and ignored.
+cmd: test "$(git ls-files | wc -l)" -eq 12 && test -z "$(git ls-files target)"
+** S3.2 Origin points to the requested repository
+cmd: test "$(git remote get-url origin)" = "https://github.com/zawatton/nelisp-touchpad.git"
+** S3.3 GitHub main resolves to the committed local source tree
+cmd: test "$(git ls-remote origin refs/heads/main | cut -f1)" = "$(git rev-parse HEAD)"
