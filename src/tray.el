@@ -213,6 +213,8 @@
       (ptr-write-u32 wc 0 80)
       (ptr-write-u64 wc 8 (addr-of window_proc))
       (ptr-write-u64 wc 24 (extern-call GetModuleHandleW 0))
+      (ptr-write-u64 wc 32 (extern-call LoadIconW (extern-call GetModuleHandleW 0) 2))
+      (ptr-write-u64 wc 72 (ptr-read-u64 wc 32))
       (ptr-write-u64 wc 64 (data-addr class_name))
       (if (= (extern-call RegisterClassExW wc) 0) (extern-call exit 23) 0)
       (setq hwnd (extern-call CreateWindowExW 0 (data-addr class_name) (data-addr title) 0 0 0 0 0 0 0

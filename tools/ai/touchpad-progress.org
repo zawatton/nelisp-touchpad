@@ -27,9 +27,9 @@ cmd: powershell.exe -NoProfile -File tools/dpi-check.ps1
 evidence: target/dpi-acceptance.log sha256=dc893f8050dd06a2de92d33f6a450d6ad8d389bafd1ef3da62b8653db3e9c79c
 
 * S3 Repository publication
-** S3.1 Git tracks exactly the twelve source and documentation files
-#+NOTE: Three publication criteria added, increasing the denominator from six to nine. Generated evidence remains local and ignored.
-cmd: test "$(git ls-files | wc -l)" -eq 12 && test -z "$(git ls-files target)"
+** S3.1 Git tracks exactly the fourteen source and documentation files
+#+NOTE: Three publication criteria added, increasing the denominator from six to nine. S5 adds two source tools, so the expected tracked-file count changes from twelve to fourteen. Generated evidence remains local and ignored.
+cmd: test "$(git ls-files | wc -l)" -eq 14 && test -z "$(git ls-files target)"
 ** S3.2 Origin points to the requested repository
 cmd: test "$(git remote get-url origin)" = "https://github.com/zawatton/nelisp-touchpad.git"
 ** S3.3 GitHub main resolves to the committed local source tree
@@ -43,3 +43,13 @@ evidence: target/icon-comparison.png sha256=1764acd7c41754bf25c43d2f2e9663b4881d
 evidence: target/icon-acceptance.log sha256=dc893f8050dd06a2de92d33f6a450d6ad8d389bafd1ef3da62b8653db3e9c79c
 ** S4.3 Reviewed icon update is published to GitHub main
 cmd: test -z "$(git status --porcelain)" && test "$(git ls-remote origin refs/heads/main | cut -f1)" = "$(git rev-parse HEAD)"
+
+* S5 Application identity icon
+** S5.1 Installed executable embeds a dedicated application icon
+#+NOTE: Three application-icon criteria added, increasing the denominator from twelve to fifteen. The baseline executable fails because it has no icon resource. The image is embedded at 16/20/24/32/40/48/64/128/256 pixels and assigned to the native window class.
+cmd: powershell.exe -NoProfile -File tools/application-icon-check.ps1
+** S5.2 Start menu and Startup shortcuts explicitly reference the executable icon
+evidence: target/application-icon-after.log sha256=39b1c99ce0c6f8f2a949c04502ebf876d22978f90a479fc7ae76a31f3812d774
+** S5.3 Installed application still passes the touchpad end-to-end checks
+#+NOTE: The new application-icon preview was visually reviewed. Live taskbar display remains unverified because the Computer Use native pipe is unavailable.
+evidence: target/application-icon-acceptance.log sha256=dc893f8050dd06a2de92d33f6a450d6ad8d389bafd1ef3da62b8653db3e9c79c

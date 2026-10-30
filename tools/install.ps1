@@ -39,12 +39,30 @@ foreach ($name in $sources.Keys) { Copy-Item -LiteralPath $sources[$name] -Desti
 $shell = New-Object -ComObject WScript.Shell
 $linkPaths = @((Join-Path ([Environment]::GetFolderPath('Programs')) 'NeLisp Touchpad.lnk'))
 if (-not $NoStartup) { $linkPaths += Join-Path ([Environment]::GetFolderPath('Startup')) 'NeLisp Touchpad.lnk' }
+$pinnedFolder = Join-Path $env:APPDATA 'Microsoft/Internet Explorer/Quick Launch/User Pinned/TaskBar'
+if (Test-Path -LiteralPath $pinnedFolder) {
+ foreach ($pinned in (Get-ChildItem -LiteralPath $pinnedFolder -Filter '*.lnk' -File)) {
+  $existing = $shell.CreateShortcut($pinned.FullName)
+  if ($existing.TargetPath -eq $installExe) { $linkPaths += $pinned.FullName }
+ }
+}
 foreach ($linkPath in $linkPaths) {
  $link = $shell.CreateShortcut($linkPath)
  $link.TargetPath = $installExe
  $link.WorkingDirectory = $installRoot
  $link.Description = 'NeLisp and Sumi touchpad control'
+ $link.IconLocation = $installExe + ',0'
  $link.Save()
+}
+Add-Type @'
+using System;
+using System.Runtime.InteropServices;
+public static class TouchpadShellIconRefresh {
+ [DllImport("shell32.dll", CharSet=CharSet.Unicode)] public static extern void SHChangeNotify(uint change,uint flags,string first,IntPtr second);
+}
+'@
+foreach ($changedPath in (@($installExe) + $linkPaths)) {
+ [TouchpadShellIconRefresh]::SHChangeNotify(0x2000,0x1005,$changedPath,[IntPtr]::Zero)
 }
 $process = Start-Process -FilePath $installExe -WorkingDirectory $installRoot -WindowStyle Hidden -PassThru
 Start-Sleep -Milliseconds 500

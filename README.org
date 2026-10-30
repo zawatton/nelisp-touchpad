@@ -17,6 +17,10 @@ Requires sibling NeLisp and Sumi checkouts, GNU Emacs as the build driver,
 and the MinGW toolchain with Cairo. Override dependencies with =NELISP_ROOT=,
 =SUMI_ROOT= and =MINGW_BIN=. The installed native executable bundles its Cairo
 dependencies and does not require Emacs or PowerShell while running.
+Building the embedded application icon additionally requires Python with Pillow
+(override the interpreter with =PYTHON_BIN=). The executable includes icon sizes
+from 16 to 256 pixels. The installer updates Start menu, Startup, and matching
+existing taskbar shortcuts to use that icon and notifies the Windows Shell.
 
 * Architecture and limits
 Application logic is Elisp compiled by the NeLisp AOT compiler to Windows x64.

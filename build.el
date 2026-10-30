@@ -39,6 +39,10 @@
                  (error_label . "タッチパッドを切り替えられませんでした。Windowsの設定を確認してください。"))))
   (unless color (error "Sumi apply_source_rgba is unavailable"))
   (make-directory target t)
+  (with-temp-buffer
+    (unless (= 0 (call-process (or (getenv "PYTHON_BIN") (executable-find "python")) nil t nil
+                              (expand-file-name "tools/build-icon.py" touchpad-root)))
+      (error "Application icon generation: %s" (buffer-string))))
   (let ((default-directory (expand-file-name "src" touchpad-root))
         (windres (expand-file-name "windres.exe" (file-name-directory (executable-find "gcc")))))
     (with-temp-buffer
