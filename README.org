@@ -2,7 +2,8 @@
 
 * Use
 The app lives in the Windows notification area. A green touchpad means enabled;
-a red touchpad with a slash means disabled. Left-click to toggle. Right-click
+a red touchpad with a slash means disabled. A white and dark double outline
+keeps both states visible on light and dark taskbars. Left-click to toggle. Right-click
 for explicit On, Off, Windows Settings, and Exit commands. Windows may initially
 place the icon in the notification area's overflow menu.
 
@@ -53,5 +54,10 @@ test the installed copy. Human visual inspection is a separate check.
 The progress ledger references local evidence under =target/=; generated
 executables, machine-specific diagnostics, and installation receipts are not
 included in the repository.
+
+For native renderer previews, set =NELISP_TOUCHPAD_ICON_ON= and
+=NELISP_TOUCHPAD_ICON_OFF= to PNG output paths, then run the built executable.
+It renders the production icons and exits without starting a resident instance.
+Clear both variables before launching normally.
 
 Reference: https://learn.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-touchpad_parameters_v1

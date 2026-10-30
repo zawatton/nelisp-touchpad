@@ -34,3 +34,12 @@ cmd: test "$(git ls-files | wc -l)" -eq 12 && test -z "$(git ls-files target)"
 cmd: test "$(git remote get-url origin)" = "https://github.com/zawatton/nelisp-touchpad.git"
 ** S3.3 GitHub main resolves to the committed local source tree
 cmd: test "$(git ls-remote origin refs/heads/main | cut -f1)" = "$(git rev-parse HEAD)"
+
+* S4 Icon contrast
+** S4.1 Native icon previews remain legible on dark and light backgrounds
+#+NOTE: Added three icon criteria, increasing the denominator from nine to twelve. Visually reviewed production Cairo output on dark/light backgrounds at 16/24/32 pixels; this does not claim a live taskbar screenshot.
+evidence: target/icon-comparison.png sha256=1764acd7c41754bf25c43d2f2e9663b4881db9f522ee0a7976a0322cada51aa0
+** S4.2 Updated installed tray and touchpad switching pass end to end
+evidence: target/icon-acceptance.log sha256=dc893f8050dd06a2de92d33f6a450d6ad8d389bafd1ef3da62b8653db3e9c79c
+** S4.3 Reviewed icon update is published to GitHub main
+cmd: test -z "$(git status --porcelain)" && test "$(git ls-remote origin refs/heads/main | cut -f1)" = "$(git rev-parse HEAD)"
